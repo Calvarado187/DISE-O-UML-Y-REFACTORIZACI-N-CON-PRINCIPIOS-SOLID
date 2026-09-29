@@ -2,17 +2,17 @@
 
 ## Sistema de pagos con múltiples métodos
 
-> Material elaborado con asistencia de IA. El diseño inicial es una referencia didáctica y no acredita la fase sin IA exigida por la consigna. Las fechas del historial son reales.
+El proyecto compara un diseño inicial de doce clases con una versión refactorizada de dieciséis clases concretas y seis interfaces. Permite cobrar pedidos por tarjeta, PayPal o bono interno, registrar el resultado, emitir facturas y notificar al cliente.
 
-Este repositorio compara una referencia inicial de doce clases con una refactorización de dieciséis clases concretas y seis interfaces.
+## Documentación
 
-## Archivos
+- [Explicación de SOLID, contratos y decisiones](EXPLICACION_SOLID.md)
+- [Fuente del diseño inicial](01_diseno_inicial_REFERENCIA_IA.mmd)
+- [Fuente del diseño refactorizado](02_diseno_refactorizado_SOLID.mmd)
 
-- [Referencia inicial editable](01_diseno_inicial_REFERENCIA_IA.mmd)
-- [Diagrama SOLID editable](02_diseno_refactorizado_SOLID.mmd)
-- [Justificación completa, contrato y requisitos](EXPLICACION_SOLID.md)
+## Diseño inicial
 
-## 1. Diseño inicial de referencia
+El procesador concentra cobro, persistencia, facturación y correo. Su dependencia de pasarelas concretas obliga a modificarlo cuando se agrega un medio de pago.
 
 ```mermaid
 classDiagram
@@ -53,17 +53,17 @@ class ResultadoPago {
   -String motivo
 }
 class ProcesadorPagos {
-  +pagar(solicitud) ResultadoPago
-  -validarPedido(pedido) boolean
-  -guardarPago(pago) void
-  -crearFactura(pedido, pago) Factura
-  -enviarCorreo(cliente, factura) void
+  +pagar(solicitud: SolicitudPago) ResultadoPago
+  -validarPedido(pedido: Pedido) boolean
+  -guardarPago(pago: Pago) void
+  -crearFactura(pedido: Pedido, pago: Pago) Factura
+  -enviarCorreo(cliente: Cliente, factura: Factura) void
 }
 class PasarelaTarjeta {
-  +cobrarTarjeta(token, importe, moneda) ResultadoPago
+  +cobrarTarjeta(token: String, importe: BigDecimal, moneda: String) ResultadoPago
 }
 class PasarelaPayPal {
-  +ejecutarPago(token, importe, moneda) ResultadoPago
+  +ejecutarPago(token: String, importe: BigDecimal, moneda: String) ResultadoPago
 }
 class Factura {
   -String id
@@ -71,9 +71,9 @@ class Factura {
   -BigDecimal total
 }
 class BaseDatos {
-  +buscarPedido(id) Pedido
-  +insertarPago(pago) void
-  +insertarFactura(factura) void
+  +buscarPedido(id: String) Pedido
+  +insertarPago(pago: Pago) void
+  +insertarFactura(factura: Factura) void
 }
 Cliente "1" --> "0..*" Pedido : realiza
 Pedido "1" *-- "1..*" LineaPedido : contiene
@@ -89,10 +89,12 @@ ProcesadorPagos ..> Cliente
 ProcesadorPagos --> BaseDatos : dependencia concreta
 ProcesadorPagos --> PasarelaTarjeta : selecciona por tipoMetodo
 ProcesadorPagos --> PasarelaPayPal : selecciona por tipoMetodo
-note for ProcesadorPagos "REFERENCIA GENERADA CON IA. No acredita la parte 1 sin IA. Concentra cobro, persistencia, facturacion y correo."
+note for ProcesadorPagos "Concentra cobro, persistencia, facturacion y correo. Depende directamente de las pasarelas."
 ```
 
-## 2. Diseño refactorizado
+## Diseño refactorizado
+
+El servicio coordina el pago mediante interfaces. Las notas señalan dónde se aplica SOLID y la relación Strategy. GitHub permite ampliar cada diagrama desde su control de visualización.
 
 ```mermaid
 classDiagram
@@ -103,7 +105,10 @@ class Cliente {
 }
 class Pedido {
   -String id
+  -String moneda
+  -String estado
   +total() BigDecimal
+  +marcarPagado() void
 }
 class LineaPedido {
   -int cantidad
@@ -123,7 +128,6 @@ class Pago {
 }
 class SolicitudPago {
   -String pedidoId
-  -String moneda
   -String tokenMetodo
   -String claveIdempotencia
 }
@@ -138,59 +142,65 @@ class Factura {
   -BigDecimal total
 }
 class ServicioPago {
-  +ServicioPago(cobrador, pedidos, pagos, facturador, notificador)
-  +pagar(solicitud) ResultadoPago
+  -Cobrador cobrador
+  -RepositorioPedidos pedidos
+  -RepositorioPagos pagos
+  -Facturador facturador
+  -NotificadorPago notificador
+  +pagar(solicitud: SolicitudPago) ResultadoPago
 }
 class Cobrador {
   <<interface>>
-  +cobrar(importe, moneda, token, clave) ResultadoPago
+  +cobrar(importe: BigDecimal, moneda: String, token: String, clave: String) ResultadoPago
 }
 class Reembolsador {
   <<interface>>
-  +reembolsar(referencia, importe, clave) ResultadoPago
+  +reembolsar(referencia: String, importe: BigDecimal, clave: String) ResultadoPago
 }
 class AdaptadorTarjeta {
-  +cobrar(importe, moneda, token, clave) ResultadoPago
-  +reembolsar(referencia, importe, clave) ResultadoPago
+  +cobrar(importe: BigDecimal, moneda: String, token: String, clave: String) ResultadoPago
+  +reembolsar(referencia: String, importe: BigDecimal, clave: String) ResultadoPago
 }
 class AdaptadorPayPal {
-  +cobrar(importe, moneda, token, clave) ResultadoPago
-  +reembolsar(referencia, importe, clave) ResultadoPago
+  +cobrar(importe: BigDecimal, moneda: String, token: String, clave: String) ResultadoPago
+  +reembolsar(referencia: String, importe: BigDecimal, clave: String) ResultadoPago
 }
 class AdaptadorBono {
-  +cobrar(importe, moneda, token, clave) ResultadoPago
+  +cobrar(importe: BigDecimal, moneda: String, token: String, clave: String) ResultadoPago
 }
 class RepositorioPedidos {
   <<interface>>
-  +buscar(id) Pedido
+  +buscar(id: String) Optional~Pedido~
+  +guardar(pedido: Pedido) void
 }
 class RepositorioPagos {
   <<interface>>
-  +buscarPorClave(clave) Pago
-  +guardar(pago, clave) void
+  +buscarPorClave(clave: String) Optional~Pago~
+  +guardar(pago: Pago, clave: String) void
 }
 class RepositorioPedidosSQL {
-  +buscar(id) Pedido
+  +buscar(id: String) Optional~Pedido~
+  +guardar(pedido: Pedido) void
 }
 class RepositorioPagosSQL {
-  +buscarPorClave(clave) Pago
-  +guardar(pago, clave) void
+  +buscarPorClave(clave: String) Optional~Pago~
+  +guardar(pago: Pago, clave: String) void
 }
 class Facturador {
   <<interface>>
-  +emitir(pedido, pago) Factura
+  +emitir(pedido: Pedido, pago: Pago) Factura
 }
 class FacturadorSimple {
-  +emitir(pedido, pago) Factura
+  +emitir(pedido: Pedido, pago: Pago) Factura
 }
 class NotificadorPago {
   <<interface>>
-  +notificar(cliente, pago, factura) void
+  +notificar(cliente: Cliente, pago: Pago, factura: Factura) void
 }
 class NotificadorEmail {
-  +notificar(cliente, pago, factura) void
+  +notificar(cliente: Cliente, pago: Pago, factura: Factura) void
 }
-Cliente "1" --> "0..*" Pedido : realiza
+Cliente "1" <-- "0..*" Pedido : pertenece a
 Pedido "1" *-- "1..*" LineaPedido : contiene
 LineaPedido "0..*" --> "1" Producto : corresponde a
 Pedido "1" --> "0..*" Pago : registra intentos
@@ -222,20 +232,18 @@ note for NotificadorEmail "S: responsabilidad de notificacion."
 note for AdaptadorBono "L: rechazos previstos se expresan como ResultadoPago, no como operacion no soportada."
 ```
 
-## Aplicación de SOLID
+## Qué mejora
 
-| Principio | Aplicación |
+| Principio | Decisión de diseño |
 | --- | --- |
-| S | ServicioPago coordina; repositorios, facturador y notificador tienen responsabilidades separadas. |
-| O | Se añade otro Cobrador sin cambiar ServicioPago. |
-| L | Todos los cobradores respetan el mismo contrato de entradas, resultados, errores e idempotencia. |
-| I | Cobro y reembolso son interfaces independientes. El bono solo cobra. |
-| D | El servicio recibe abstracciones por constructor. |
+| Responsabilidad única | Separar coordinación, cobro, persistencia, facturación y notificación. |
+| Abierto/cerrado | Incorporar nuevos cobradores sin modificar el servicio. |
+| Sustitución de Liskov | Compartir contrato de entradas, resultados, errores e idempotencia. |
+| Segregación de interfaces | Separar cobro y reembolso; el bono no ofrece reembolsos. |
+| Inversión de dependencias | Recibir los cinco colaboradores mediante interfaces e inyección por constructor. |
 
-Las notas del diagrama indican los principios en los elementos correspondientes. Strategy aparece en la relación entre ServicioPago, Cobrador y sus implementaciones.
+## Alcance y procedencia
 
-## Historial y alcance
+Diseños elaborados con asistencia de IA. La versión inicial es una referencia y no acredita la fase sin IA de la consigna. El historial conserva el README de creación, ambas versiones del diseño y sus revisiones, con fechas reales.
 
-El repositorio se creó con un README en un commit inicial. Después se añade la referencia de diseño y, en otro commit, la refactorización. Se conserva ese historial sin reescribirlo. Esta secuencia contiene tres commits y no equivale a acreditar una primera fase realizada sin IA.
-
-La entrega en TEMA sigue pendiente. Este trabajo documenta UML y comportamiento esperado; no incluye ni acredita una integración de pagos ejecutada.
+La entrega en TEMA está pendiente. El alcance es diseño UML: no incluye una integración de pagos ejecutada.

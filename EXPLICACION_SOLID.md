@@ -4,8 +4,6 @@
 
 El sistema permite cobrar un pedido mediante tarjeta, PayPal o un bono interno, registrar el resultado, emitir una factura cuando se aprueba el pago y notificar al cliente. El bono es una decisión de este ejemplo: permite cobrar, pero no ofrece reembolsos.
 
-**Procedencia:** los dos diseños y este documento se prepararon con asistencia de IA. La versión inicial es una referencia didáctica; no acredita la fase que la consigna exige realizar sin IA. El historial del repositorio refleja las fechas reales de elaboración y publicación.
-
 ## Requisitos que aparecen en las capturas
 
 La actividad se titula «Actividad en clase principios SOLID» y el bloque central, «DISEÑO UML Y REFACTORIZACIÓN CON PRINCIPIOS SOLID». La plataforma muestra apertura el jueves 27 de agosto de 2026 a las 08:00 y cierre ese día a las 10:15. Son fechas del enunciado fotografiado, no fechas de realización de este trabajo.
@@ -117,6 +115,17 @@ La revisión del diseño debe comprobar que se pueden componer tarjeta, PayPal o
 
 ## Alcance de la entrega
 
-Los archivos incluyen una referencia inicial asistida por IA, una refactorización y su justificación. No se dispone de las diapositivas del curso ni de un diagrama inicial manual. Por eso no se afirma cumplir la restricción de autoría de la parte 1. Tampoco se afirma haber entregado el enlace en TEMA.
+Los archivos incluyen el diseño inicial de referencia, la refactorización y su justificación. La procedencia se documenta en el README. No se dispone de las diapositivas del curso ni de un diseño manual previo. La entrega en TEMA sigue pendiente.
 
-La alternativa fiel a la consigna es que el estudiante elabore su versión inicial usando las diapositivas y que la refactorización se ajuste después a ese diseño. Dos commits actuales documentan versiones, pero no convierten una propuesta generada con IA en trabajo previo sin IA.
+
+## Precisiones de la revisión técnica
+
+- Las operaciones declaran el tipo de cada parámetro. Los métodos de consulta devuelven `Optional<Pedido>` y `Optional<Pago>` para representar explícitamente la ausencia de registros. El servicio rechaza un pedido inexistente antes de intentar cobrar.
+- La moneda pertenece al pedido; la solicitud identifica el pedido y aporta el token y la clave. El cliente no puede cambiar el importe ni la moneda de una compra mediante la solicitud.
+- `Pedido` navega hacia su `Cliente`, de modo que el servicio puede obtener el destinatario. Los accesores triviales se omiten para mantener legible el diagrama. Las asociaciones representan referencias aunque no se dupliquen como atributos.
+- `ServicioPago` muestra sus cinco dependencias con tipos de interfaz. Todas son obligatorias y se reciben por constructor; su firma se omite del dibujo para evitar una caja excesivamente ancha.
+- Cada cantidad de línea es positiva y cada precio es no negativo. El total debe ser positivo para efectuar el cobro. Todos los importes del pedido usan su moneda y una regla única de redondeo al sumar.
+- Los estados de pedido utilizados en este alcance son PENDIENTE, PAGADO y CANCELADO. Un pedido PAGADO o CANCELADO no admite un nuevo intento lógico de cobro; repetir una clave previamente finalizada devuelve su resultado conocido.
+- Los estados de pago contemplados son EN_PROCESO, APROBADO, RECHAZADO e INCIERTO. Ante aprobación, el servicio llama a `Pedido.marcarPagado()` y persiste el pedido mediante `RepositorioPedidos.guardar()`. La escritura del pedido y el registro del resultado necesitan coordinación transaccional en la implementación; un error local después del cobro requiere recuperación, no repetir el cargo.
+- `Reembolsador` opera sobre la referencia de una transacción previa y su moneda original. El importe debe ser positivo y no exceder el saldo reembolsable. Una negativa de negocio se expresa en ResultadoPago; los fallos técnicos usan la misma política común del cobro.
+- Se verifica la visualización de ambos diagramas en GitHub. La revisión documental no equivale a pruebas de un programa Java ni a validación de proveedores reales.

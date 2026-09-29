@@ -6,7 +6,10 @@ class Cliente {
 }
 class Pedido {
   -String id
+  -String moneda
+  -String estado
   +total() BigDecimal
+  +marcarPagado() void
 }
 class LineaPedido {
   -int cantidad
@@ -26,7 +29,6 @@ class Pago {
 }
 class SolicitudPago {
   -String pedidoId
-  -String moneda
   -String tokenMetodo
   -String claveIdempotencia
 }
@@ -41,59 +43,65 @@ class Factura {
   -BigDecimal total
 }
 class ServicioPago {
-  +ServicioPago(cobrador, pedidos, pagos, facturador, notificador)
-  +pagar(solicitud) ResultadoPago
+  -Cobrador cobrador
+  -RepositorioPedidos pedidos
+  -RepositorioPagos pagos
+  -Facturador facturador
+  -NotificadorPago notificador
+  +pagar(solicitud: SolicitudPago) ResultadoPago
 }
 class Cobrador {
   <<interface>>
-  +cobrar(importe, moneda, token, clave) ResultadoPago
+  +cobrar(importe: BigDecimal, moneda: String, token: String, clave: String) ResultadoPago
 }
 class Reembolsador {
   <<interface>>
-  +reembolsar(referencia, importe, clave) ResultadoPago
+  +reembolsar(referencia: String, importe: BigDecimal, clave: String) ResultadoPago
 }
 class AdaptadorTarjeta {
-  +cobrar(importe, moneda, token, clave) ResultadoPago
-  +reembolsar(referencia, importe, clave) ResultadoPago
+  +cobrar(importe: BigDecimal, moneda: String, token: String, clave: String) ResultadoPago
+  +reembolsar(referencia: String, importe: BigDecimal, clave: String) ResultadoPago
 }
 class AdaptadorPayPal {
-  +cobrar(importe, moneda, token, clave) ResultadoPago
-  +reembolsar(referencia, importe, clave) ResultadoPago
+  +cobrar(importe: BigDecimal, moneda: String, token: String, clave: String) ResultadoPago
+  +reembolsar(referencia: String, importe: BigDecimal, clave: String) ResultadoPago
 }
 class AdaptadorBono {
-  +cobrar(importe, moneda, token, clave) ResultadoPago
+  +cobrar(importe: BigDecimal, moneda: String, token: String, clave: String) ResultadoPago
 }
 class RepositorioPedidos {
   <<interface>>
-  +buscar(id) Pedido
+  +buscar(id: String) Optional~Pedido~
+  +guardar(pedido: Pedido) void
 }
 class RepositorioPagos {
   <<interface>>
-  +buscarPorClave(clave) Pago
-  +guardar(pago, clave) void
+  +buscarPorClave(clave: String) Optional~Pago~
+  +guardar(pago: Pago, clave: String) void
 }
 class RepositorioPedidosSQL {
-  +buscar(id) Pedido
+  +buscar(id: String) Optional~Pedido~
+  +guardar(pedido: Pedido) void
 }
 class RepositorioPagosSQL {
-  +buscarPorClave(clave) Pago
-  +guardar(pago, clave) void
+  +buscarPorClave(clave: String) Optional~Pago~
+  +guardar(pago: Pago, clave: String) void
 }
 class Facturador {
   <<interface>>
-  +emitir(pedido, pago) Factura
+  +emitir(pedido: Pedido, pago: Pago) Factura
 }
 class FacturadorSimple {
-  +emitir(pedido, pago) Factura
+  +emitir(pedido: Pedido, pago: Pago) Factura
 }
 class NotificadorPago {
   <<interface>>
-  +notificar(cliente, pago, factura) void
+  +notificar(cliente: Cliente, pago: Pago, factura: Factura) void
 }
 class NotificadorEmail {
-  +notificar(cliente, pago, factura) void
+  +notificar(cliente: Cliente, pago: Pago, factura: Factura) void
 }
-Cliente "1" --> "0..*" Pedido : realiza
+Cliente "1" <-- "0..*" Pedido : pertenece a
 Pedido "1" *-- "1..*" LineaPedido : contiene
 LineaPedido "0..*" --> "1" Producto : corresponde a
 Pedido "1" --> "0..*" Pago : registra intentos

@@ -36,17 +36,17 @@ class ResultadoPago {
   -String motivo
 }
 class ProcesadorPagos {
-  +pagar(solicitud) ResultadoPago
-  -validarPedido(pedido) boolean
-  -guardarPago(pago) void
-  -crearFactura(pedido, pago) Factura
-  -enviarCorreo(cliente, factura) void
+  +pagar(solicitud: SolicitudPago) ResultadoPago
+  -validarPedido(pedido: Pedido) boolean
+  -guardarPago(pago: Pago) void
+  -crearFactura(pedido: Pedido, pago: Pago) Factura
+  -enviarCorreo(cliente: Cliente, factura: Factura) void
 }
 class PasarelaTarjeta {
-  +cobrarTarjeta(token, importe, moneda) ResultadoPago
+  +cobrarTarjeta(token: String, importe: BigDecimal, moneda: String) ResultadoPago
 }
 class PasarelaPayPal {
-  +ejecutarPago(token, importe, moneda) ResultadoPago
+  +ejecutarPago(token: String, importe: BigDecimal, moneda: String) ResultadoPago
 }
 class Factura {
   -String id
@@ -54,9 +54,9 @@ class Factura {
   -BigDecimal total
 }
 class BaseDatos {
-  +buscarPedido(id) Pedido
-  +insertarPago(pago) void
-  +insertarFactura(factura) void
+  +buscarPedido(id: String) Pedido
+  +insertarPago(pago: Pago) void
+  +insertarFactura(factura: Factura) void
 }
 Cliente "1" --> "0..*" Pedido : realiza
 Pedido "1" *-- "1..*" LineaPedido : contiene
@@ -72,4 +72,4 @@ ProcesadorPagos ..> Cliente
 ProcesadorPagos --> BaseDatos : dependencia concreta
 ProcesadorPagos --> PasarelaTarjeta : selecciona por tipoMetodo
 ProcesadorPagos --> PasarelaPayPal : selecciona por tipoMetodo
-note for ProcesadorPagos "REFERENCIA GENERADA CON IA. No acredita la parte 1 sin IA. Concentra cobro, persistencia, facturacion y correo."
+note for ProcesadorPagos "Concentra cobro, persistencia, facturacion y correo. Depende directamente de las pasarelas."
