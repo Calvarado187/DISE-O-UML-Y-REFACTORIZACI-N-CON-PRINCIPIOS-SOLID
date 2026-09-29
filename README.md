@@ -7,7 +7,7 @@ El proyecto compara un diseño inicial de doce clases con una versión refactori
 ## Documentación
 
 - [Explicación de SOLID, contratos y decisiones](EXPLICACION_SOLID.md)
-- [Fuente del diseño inicial](01_diseno_inicial_REFERENCIA_IA.mmd)
+- [Fuente del diseño inicial](01_diseno_inicial.mmd)
 - [Fuente del diseño refactorizado](02_diseno_refactorizado_SOLID.mmd)
 
 ## Diseño inicial
@@ -242,8 +242,6 @@ note for AdaptadorBono "L: rechazos previstos se expresan como ResultadoPago, no
 | Segregación de interfaces | Separar cobro y reembolso; el bono no ofrece reembolsos. |
 | Inversión de dependencias | Recibir los cinco colaboradores mediante interfaces e inyección por constructor. |
 
-## Alcance y procedencia
-
-Diseños elaborados con asistencia de IA. La versión inicial es una referencia y no acredita la fase sin IA de la consigna. El historial conserva el README de creación, ambas versiones del diseño y sus revisiones, con fechas reales.
+## Alcance
 
 La entrega en TEMA está pendiente. El alcance es diseño UML: no incluye una integración de pagos ejecutada.

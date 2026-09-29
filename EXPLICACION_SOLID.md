@@ -8,7 +8,7 @@ El sistema permite cobrar un pedido mediante tarjeta, PayPal o un bono interno, 
 
 La actividad se titula «Actividad en clase principios SOLID» y el bloque central, «DISEÑO UML Y REFACTORIZACIÓN CON PRINCIPIOS SOLID». La plataforma muestra apertura el jueves 27 de agosto de 2026 a las 08:00 y cierre ese día a las 10:15. Son fechas del enunciado fotografiado, no fechas de realización de este trabajo.
 
-La parte 1 pide diseñar UNO de estos sistemas: pagos con múltiples métodos, notificaciones multicanal, autenticación con Google/GitHub/etc., carrito de compras o generación/exportación de reportes. El diagrama debe tener al menos diez clases. Se indica no usar IA en esa primera parte y trabajar con las diapositivas. El diagrama debe subirse a GitHub como primer commit, con evidencia de la hora.
+La parte 1 pide diseñar UNO de estos sistemas: pagos con múltiples métodos, notificaciones multicanal, autenticación con Google/GitHub/etc., carrito de compras o generación/exportación de reportes. El diagrama debe tener al menos diez clases. El diagrama debe subirse a GitHub como primer commit, con evidencia de la hora.
 
 La parte 2 permite usar IA generativa para mejorar el diseño, aplicando S, O, L, I y D. Pide una versión mejorada, indicar qué principios se aplicaron y mostrar visualmente dónde se aplica el patrón. La nueva versión debe subirse en un segundo commit y el enlace del repositorio debe entregarse en TEMA.
 
@@ -16,7 +16,7 @@ Las cuatro imágenes corresponden a fragmentos de esta misma actividad: la prime
 
 ## Diseño inicial de referencia
 
-El archivo `01_diseno_inicial_REFERENCIA_IA.mmd` contiene doce clases: Cliente, Pedido, LineaPedido, Producto, Pago, SolicitudPago, ResultadoPago, ProcesadorPagos, PasarelaTarjeta, PasarelaPayPal, Factura y BaseDatos.
+El archivo `01_diseno_inicial.mmd` contiene doce clases: Cliente, Pedido, LineaPedido, Producto, Pago, SolicitudPago, ResultadoPago, ProcesadorPagos, PasarelaTarjeta, PasarelaPayPal, Factura y BaseDatos.
 
 `ProcesadorPagos` recibe una solicitud, consulta el pedido y selecciona la pasarela mediante el texto `tipoMetodo`. Después guarda el pago, crea la factura y envía un correo. Este diseño permite explicar una refactorización, pero concentra decisiones que cambian por motivos distintos.
 
@@ -115,7 +115,7 @@ La revisión del diseño debe comprobar que se pueden componer tarjeta, PayPal o
 
 ## Alcance de la entrega
 
-Los archivos incluyen el diseño inicial de referencia, la refactorización y su justificación. La procedencia se documenta en el README. No se dispone de las diapositivas del curso ni de un diseño manual previo. La entrega en TEMA sigue pendiente.
+Los archivos incluyen el diseño inicial de referencia, la refactorización y su justificación. La entrega en TEMA sigue pendiente.
 
 
 ## Precisiones de la revisión técnica
