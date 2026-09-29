@@ -1,12 +1,3 @@
-# Diseño UML y refactorización con principios SOLID
-
-## Sistema de pagos con múltiples métodos
-
-> Material elaborado con asistencia de IA. El diseño inicial es una referencia didáctica y no acredita la fase sin IA exigida por la consigna. Las fechas del historial son reales.
-
-## Diseño inicial de referencia — 12 clases
-
-```mermaid
 classDiagram
 direction TB
 class Cliente {
@@ -82,6 +73,3 @@ ProcesadorPagos --> BaseDatos : dependencia concreta
 ProcesadorPagos --> PasarelaTarjeta : selecciona por tipoMetodo
 ProcesadorPagos --> PasarelaPayPal : selecciona por tipoMetodo
 note for ProcesadorPagos "REFERENCIA GENERADA CON IA. No acredita la parte 1 sin IA. Concentra cobro, persistencia, facturacion y correo."
-```
-
-El procesador concentra cobro, persistencia, facturación y correo, y selecciona pasarelas concretas. La siguiente versión separará responsabilidades y dependerá de interfaces.
